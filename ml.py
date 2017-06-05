@@ -19,11 +19,31 @@ for line in dataFile:
 	line = line.strip()
 	line = line.split(',')
 	for i in range(0, len(line)):
-		#print i
-		#print line[i]
 		currentDict = mapVals[i]
-		#print currentDict
-		if not line[i] in currentDict:
+		if not line[i].strip() in currentDict:
 			currentDict[line[i].strip()] = len(currentDict)
+
+dataFile.close()
+
+#Load data into X and Y matrix
+xTrain = np.zeros((numRowTotal, numCol-1))
+yTrain = np.zeros((numRowTotal,1))
+dataFile = open(fileLoc, 'r')
+loadIndex = 0
+for line in dataFile:
+	line = line.strip()
+	line = line.split(',')
+	lineIndex = 0
+	#Load row values for X matrix
+	while(lineIndex < len(line)-1):
+		rawVal = line[lineIndex].strip() #Retreive mapping
+		mappedVal = mapVals[lineIndex][rawVal]
+		xTrain[loadIndex][lineIndex] = mappedVal
+		lineIndex += 1
+	#Load associated value for Y Matrix
+	rawVal = line[lineIndex].strip()
+	mappedVal = mapVals[lineIndex][rawVal]
+	yTrain[loadIndex] = mappedVal
+	loadIndex +=1
 
 dataFile.close()

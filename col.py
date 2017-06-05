@@ -17,7 +17,7 @@ for line in dataFile:
 		#print line[i]
 		currentDict = vals[i]
 		#print currentDict
-		if not line[i] in currentDict:
+		if not line[i].strip() in currentDict:
 			currentDict[line[i].strip()] = len(currentDict) # =1 --for count
 		#else:
 			#currentDict[line[i]] += 1 -- for count
