@@ -7,6 +7,13 @@ dataFile = open(fileLoc, 'r')
 numRowTotal = 199523
 numCol = 42
 
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
 vals = [dict() for x in range(numCol)]
 
 for line in dataFile:
@@ -17,8 +24,9 @@ for line in dataFile:
 		#print line[i]
 		currentDict = vals[i]
 		#print currentDict
-		if not line[i].strip() in currentDict:
-			currentDict[line[i].strip()] = len(currentDict) # =1 --for count
+		if(is_number(line[i].strip()) == False): #Only map strings, leave numbers alone
+			if not line[i].strip() in currentDict:
+				currentDict[line[i].strip()] = len(currentDict) # =1 --for count
 		#else:
 			#currentDict[line[i]] += 1 -- for count
 
