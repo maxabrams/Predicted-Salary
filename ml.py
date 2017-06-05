@@ -8,10 +8,22 @@ import math
 
 #Read Load Data
 fileLoc = 'census-income.data'
-dataFile = open(fileLoc, 'r')
 numRowTotal = 199523
-numCol = 41
+numCol = 42
 
-#Use 90% as training data, 10% as test data
-numRowTrain = math.floor(numRowTotal * .9)
-numRowTest = numRowTotal - numRowTrain
+#Make dictionary value mapings
+dataFile = open(fileLoc, 'r')
+mapVals = [dict() for x in range(numCol)]
+
+for line in dataFile:
+	line = line.strip()
+	line = line.split(',')
+	for i in range(0, len(line)):
+		#print i
+		#print line[i]
+		currentDict = mapVals[i]
+		#print currentDict
+		if not line[i] in currentDict:
+			currentDict[line[i].strip()] = len(currentDict)
+
+dataFile.close()
