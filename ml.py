@@ -5,6 +5,10 @@
 import os
 import numpy as np
 import math
+from sklearn.naive_bayes import GaussianNB
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.naive_bayes import BernoulliNB
+from sklearn import tree
 
 #Helper function for mapping
 def is_number(s):
@@ -35,7 +39,7 @@ for line in dataFile:
 dataFile.close()
 
 #Load training data into X and Y matrix
-xTrain = np.zeros((numRowTotal, numCol-1))
+xTrainOG = np.zeros((numRowTotal, numCol-1))
 yTrain = np.zeros((numRowTotal,1))
 dataFile = open(fileLoc, 'r')
 loadIndex = 0
@@ -48,11 +52,11 @@ for line in dataFile:
 		rawVal = line[lineIndex].strip() #Retreive mapping
 		if not rawVal in mapVals[lineIndex]:
 			#Must have been a float previously, use float value
-			xTrain[loadIndex][lineIndex] = float(rawVal)
+			xTrainOG[loadIndex][lineIndex] = float(rawVal)
 		else:
 			#Has an associated string-value mapping
 			mappedVal = mapVals[lineIndex][rawVal]
-			xTrain[loadIndex][lineIndex] = mappedVal
+			xTrainOG[loadIndex][lineIndex] = mappedVal
 		lineIndex += 1
 	#Load associated value for Y Matrix
 	rawVal = line[lineIndex].strip()
@@ -61,13 +65,11 @@ for line in dataFile:
 	loadIndex +=1
 
 dataFile.close()
-print xTrain[0]
-
 
 #Load TEST data into X and Y matrix
 fileLoc = 'census-income.test'
 numRowTotal = 99762
-xTest = np.zeros((numRowTotal, numCol-1))
+xTestOG = np.zeros((numRowTotal, numCol-1))
 yTest = np.zeros((numRowTotal,1))
 dataFile = open(fileLoc, 'r')
 loadIndex = 0
@@ -79,10 +81,10 @@ for line in dataFile:
 	while(lineIndex < len(line)-1):
 		rawVal = line[lineIndex].strip() #Retreive mapping
 		if not rawVal in mapVals[lineIndex]:
-			xTest[loadIndex][lineIndex] = float(rawVal)
+			xTestOG[loadIndex][lineIndex] = float(rawVal)
 		else:
 			mappedVal = mapVals[lineIndex][rawVal]
-			xTest[loadIndex][lineIndex] = mappedVal
+			xTestOG[loadIndex][lineIndex] = mappedVal
 		lineIndex += 1
 	#Load associated value for Y Matrix
 	rawVal = line[lineIndex].strip()
@@ -92,4 +94,56 @@ for line in dataFile:
 
 dataFile.close()
 
-print xTest[0]
+treeArray=[]
+for i in range(41):
+	# print "-----------------"
+	# print i
+	# print "-----------------"
+	xTrain= np.delete(xTrainOG, i, axis=1)
+	xTest= np.delete(xTestOG, i, axis=1)
+
+
+	yTrain=yTrain.ravel()
+	yTest= yTest.ravel()
+	#Gaussian
+	# print "Gaussian Naive-Bayes:"
+	gnb= GaussianNB()
+	gnb.fit(xTrain, yTrain)
+	gnb_predictions= gnb.predict(xTest)
+	# print "Train score: ",  gnb.score(xTrain, yTrain)
+	# print "Test score: ", gnb.score(xTest, yTest)
+	# print gnb.theta_, gnb.sigma_
+
+	# print "Multinomial Naive-Bayes:"
+	mnb=MultinomialNB()
+	mnb.fit(xTrain, yTrain)
+	mnb_predictions= mnb.predict(xTest)
+	# print "Train score: ", mnb.score(xTrain, yTrain)
+	# print  "Test score: ", mnb.score(xTest, yTest)
+
+	# print "Bernoulli Naive-Bayes:"
+	bnb=MultinomialNB()
+	bnb.fit(xTrain, yTrain)
+	bnb.predictions= bnb.predict(xTest)
+	# print "Train score: ", bnb.score(xTrain, yTrain)
+	# print "Test score: ", bnb.score(xTest, yTest)
+
+	# print "Decision Tree Classifier:"
+	treeClass=  tree.DecisionTreeClassifier()
+	treeClass= treeClass.fit(xTrain, yTrain)
+	tc_predict=treeClass.predict(xTest)
+	treeScore= treeClass.score(xTest, yTest)
+	# print "Train score: ", treeClass.score(xTrain, yTrain)
+	# print "Test score: ", treeScore
+
+	treeArray.append(treeScore)
+
+max=0
+index=0
+
+for i in range(41):
+	if treeArray[i]>max:
+		max=treeArray[i]
+		index=i
+
+print max, " index: ", index
