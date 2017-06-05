@@ -5,6 +5,7 @@
 import os
 import numpy as np
 import math
+import collections
 from sklearn.naive_bayes import GaussianNB
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.naive_bayes import BernoulliNB
@@ -138,12 +139,14 @@ for i in range(41):
 
 	treeArray.append(treeScore)
 
-max=0
-index=0
+#Determine highest scores and associated attributes
+mapOut = {}
 
 for i in range(41):
-	if treeArray[i]>max:
-		max=treeArray[i]
-		index=i
+	mapOut[i]=treeArray[i]
 
-print max, " index: ", index
+#Orded most important to least important index
+print collections.OrderedDict(sorted(mapOut.items(), key=lambda t: t[1]))
+
+
+
