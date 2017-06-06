@@ -96,87 +96,109 @@ for line in dataFile:
 dataFile.close()
 
 #Fake People Test
+fakeTest = False
 #Load TEST data into X and Y matrix
-fileLoc = 'FakePeople.data'
-numRowTotal = 3
-xTestOG = np.zeros((numRowTotal, numCol-1))
-yTest = np.zeros((numRowTotal,1))
-dataFile = open(fileLoc, 'r')
-loadIndex = 0
-for line in dataFile:
-	line = line.strip()
-	line = line.split(',')
-	lineIndex = 0
-	#Load row values for X matrix
-	while(lineIndex < len(line)-1):
-		rawVal = line[lineIndex].strip() #Retreive mapping
-		if not rawVal in mapVals[lineIndex]:
-			xTestOG[loadIndex][lineIndex] = float(rawVal)
-		else:
-			mappedVal = mapVals[lineIndex][rawVal]
-			xTestOG[loadIndex][lineIndex] = mappedVal
-		lineIndex += 1
-	#Load associated value for Y Matrix
-	rawVal = line[lineIndex].strip()
-	mappedVal = mapVals[lineIndex][rawVal]
-	yTest[loadIndex] = mappedVal
-	loadIndex +=1
+if(fakeTest):
+	fileLoc = 'FakePeople.data'
+	numRowTotal = 3
+	xTestOG = np.zeros((numRowTotal, numCol-1))
+	yTest = np.zeros((numRowTotal,1))
+	dataFile = open(fileLoc, 'r')
+	loadIndex = 0
+	for line in dataFile:
+		line = line.strip()
+		line = line.split(',')
+		lineIndex = 0
+		#Load row values for X matrix
+		while(lineIndex < len(line)-1):
+			rawVal = line[lineIndex].strip() #Retreive mapping
+			if not rawVal in mapVals[lineIndex]:
+				xTestOG[loadIndex][lineIndex] = float(rawVal)
+			else:
+				mappedVal = mapVals[lineIndex][rawVal]
+				xTestOG[loadIndex][lineIndex] = mappedVal
+			lineIndex += 1
+		#Load associated value for Y Matrix
+		rawVal = line[lineIndex].strip()
+		mappedVal = mapVals[lineIndex][rawVal]
+		yTest[loadIndex] = mappedVal
+		loadIndex +=1
 
-dataFile.close()
+	dataFile.close()
 
 scoreArr=[]
-for i in range(41):
+printAll = True
+deleteArr = []
+numColTest = 1#41 - len(deleteArr)
+
+for i in range(numColTest):
 	# print "-----------------"
 	# print i
 	# print "-----------------"
-	xTrain= np.delete(xTrainOG, i, axis=1)
-	xTest= np.delete(xTestOG, i, axis=1)
-
+	if deleteArr:
+		for val in deleteArr:
+			xTrain= np.delete(xTrainOG, val, axis=1)
+			xTest= np.delete(xTestOG, val, axis=1)
+	else:
+		xTrain = xTrainOG
+		xTest = xTestOG
+	#xTrain= np.delete(xTrainOG, i, axis=1)
+	#xTest= np.delete(xTestOG, i, axis=1)
 
 	yTrain=yTrain.ravel()
 	yTest= yTest.ravel()
 	#Gaussian
-	# print "Gaussian Naive-Bayes:"
+
 	gnb= GaussianNB()
 	gnb.fit(xTrain, yTrain)
 	gnb_predictions= gnb.predict(xTest)
-	# print "Train score: ",  gnb.score(xTrain, yTrain)
-	# print "Test score: ", gnb.score(xTest, yTest)
-	# print gnb.theta_, gnb.sigma_
+	if (printAll):
+		print "Gaussian Naive-Bayes:"
+		print "Train score: ",  gnb.score(xTrain, yTrain)
+		print "Test score: ", gnb.score(xTest, yTest)
+	#print gnb.theta_, gnb.sigma_
 
-	# print "Multinomial Naive-Bayes:"
+	#Multinomial
 	mnb=MultinomialNB()
 	mnb.fit(xTrain, yTrain)
 	mnb_predictions= mnb.predict(xTest)
 	mnbScore = mnb.score(xTest, yTest)
-	# print "Train score: ", mnb.score(xTrain, yTrain)
-	# print  "Test score: ", mnb.score(xTest, yTest)
+	if (printAll):
+		print "Multinomial Naive-Bayes:"
+		print "Train score: ", mnb.score(xTrain, yTrain)
+		print  "Test score: ", mnbScore
 
-	# print "Bernoulli Naive-Bayes:"
+	
+	#Bernoulli
 	bnb=MultinomialNB()
 	bnb.fit(xTrain, yTrain)
 	bnb.predictions= bnb.predict(xTest)
-	# print "Train score: ", bnb.score(xTrain, yTrain)
-	# print "Test score: ", bnb.score(xTest, yTest)
+	if (printAll):
+		print "Bernoulli Naive-Bayes:"
+		print "Train score: ", bnb.score(xTrain, yTrain)
+		print "Test score: ", bnb.score(xTest, yTest)
 
-	# print "Decision Tree Classifier:"
+	
+	#Decision Tree Classifier
 	treeClass=  tree.DecisionTreeClassifier()
 	treeClass= treeClass.fit(xTrain, yTrain)
 	tc_predict=treeClass.predict(xTest)
 	treeScore= treeClass.score(xTest, yTest)
-	# print "Train score: ", treeClass.score(xTrain, yTrain)
-	# print "Test score: ", treeScore
+	if (printAll):
+		print "Decision Tree Classifier:"
+		print "Train score: ", treeClass.score(xTrain, yTrain)
+		print "Test score: ", treeScore
 
 	scoreArr.append(mnbScore)
-	print mnbScore
 #Determine highest scores and associated attributes
 mapOut = {}
 
-for i in range(41):
+for i in range(numColTest):
 	mapOut[i]=scoreArr[i]
 
 #Orded most important to least important index
 print collections.OrderedDict(sorted(mapOut.items(), key=lambda t: t[1]))
+# Not working # tree.export_graphviz(treeClass, out_file='tree.dot')  
 
 
 
