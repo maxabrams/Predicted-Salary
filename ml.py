@@ -95,7 +95,7 @@ for line in dataFile:
 
 dataFile.close()
 
-treeArray=[]
+scoreArr=[]
 for i in range(41):
 	# print "-----------------"
 	# print i
@@ -119,6 +119,7 @@ for i in range(41):
 	mnb=MultinomialNB()
 	mnb.fit(xTrain, yTrain)
 	mnb_predictions= mnb.predict(xTest)
+	mnbScore = mnb.score(xTest, yTest)
 	# print "Train score: ", mnb.score(xTrain, yTrain)
 	# print  "Test score: ", mnb.score(xTest, yTest)
 
@@ -137,13 +138,13 @@ for i in range(41):
 	# print "Train score: ", treeClass.score(xTrain, yTrain)
 	# print "Test score: ", treeScore
 
-	treeArray.append(treeScore)
+	scoreArr.append(mnbScore)
 
 #Determine highest scores and associated attributes
 mapOut = {}
 
 for i in range(41):
-	mapOut[i]=treeArray[i]
+	mapOut[i]=scoreArr[i]
 
 #Orded most important to least important index
 print collections.OrderedDict(sorted(mapOut.items(), key=lambda t: t[1]))
