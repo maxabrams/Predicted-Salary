@@ -95,6 +95,35 @@ for line in dataFile:
 
 dataFile.close()
 
+#Fake People Test
+#Load TEST data into X and Y matrix
+fileLoc = 'FakePeople.data'
+numRowTotal = 3
+xTestOG = np.zeros((numRowTotal, numCol-1))
+yTest = np.zeros((numRowTotal,1))
+dataFile = open(fileLoc, 'r')
+loadIndex = 0
+for line in dataFile:
+	line = line.strip()
+	line = line.split(',')
+	lineIndex = 0
+	#Load row values for X matrix
+	while(lineIndex < len(line)-1):
+		rawVal = line[lineIndex].strip() #Retreive mapping
+		if not rawVal in mapVals[lineIndex]:
+			xTestOG[loadIndex][lineIndex] = float(rawVal)
+		else:
+			mappedVal = mapVals[lineIndex][rawVal]
+			xTestOG[loadIndex][lineIndex] = mappedVal
+		lineIndex += 1
+	#Load associated value for Y Matrix
+	rawVal = line[lineIndex].strip()
+	mappedVal = mapVals[lineIndex][rawVal]
+	yTest[loadIndex] = mappedVal
+	loadIndex +=1
+
+dataFile.close()
+
 scoreArr=[]
 for i in range(41):
 	# print "-----------------"
@@ -139,7 +168,7 @@ for i in range(41):
 	# print "Test score: ", treeScore
 
 	scoreArr.append(mnbScore)
-
+	print mnbScore
 #Determine highest scores and associated attributes
 mapOut = {}
 
