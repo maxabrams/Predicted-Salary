@@ -9,6 +9,7 @@ import collections
 from sklearn.naive_bayes import GaussianNB
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.naive_bayes import BernoulliNB
+from sklearn.feature_extraction import DictVectorizer
 from sklearn import tree
 
 #Helper function for mapping
@@ -44,13 +45,25 @@ xTrainOG = np.zeros((numRowTotal, numCol-1))
 yTrain = np.zeros((numRowTotal,1))
 dataFile = open(fileLoc, 'r')
 loadIndex = 0
+
+
+xTrainMatrix = [] #Use array for vectorization
+yTrainMatrix = []
 for line in dataFile:
 	line = line.strip()
 	line = line.split(',')
 	lineIndex = 0
+	lineArr = {}
 	#Load row values for X matrix
 	while(lineIndex < len(line)-1):
 		rawVal = line[lineIndex].strip() #Retreive mapping
+		if is_number(rawVal):
+			lineArr[str(lineIndex)] = float(rawVal)
+			#addItem = {str(lineIndex):float(rawVal)}
+		else:
+			lineArr[str(lineIndex)] = rawVal
+			#addItem = {str(lineIndex):rawVal}
+		#lineArr += addItem
 		if not rawVal in mapVals[lineIndex]:
 			#Must have been a float previously, use float value
 			xTrainOG[loadIndex][lineIndex] = float(rawVal)
@@ -59,13 +72,22 @@ for line in dataFile:
 			mappedVal = mapVals[lineIndex][rawVal]
 			xTrainOG[loadIndex][lineIndex] = mappedVal
 		lineIndex += 1
+	xTrainMatrix.append(lineArr)
 	#Load associated value for Y Matrix
 	rawVal = line[lineIndex].strip()
 	mappedVal = mapVals[lineIndex][rawVal]
+	yTrainMatrix.append(mappedVal)
 	yTrain[loadIndex] = mappedVal
 	loadIndex +=1
 
+#Convert string values to their own coloums with vectorization
+#print XTrainMatrix
+xVec = DictVectorizer()
+xTrainMatrix = xVec.fit_transform(xTrainMatrix).toarray()
+#print XTrainMatrix
+#print xVec.get_feature_names()
 dataFile.close()
+xTrainOG = xTrainMatrix
 
 #Load TEST data into X and Y matrix
 fileLoc = 'census-income.test'
@@ -74,26 +96,43 @@ xTestOG = np.zeros((numRowTotal, numCol-1))
 yTest = np.zeros((numRowTotal,1))
 dataFile = open(fileLoc, 'r')
 loadIndex = 0
+xTestMatrix = [] #Use array for vectorization
+yTestMatrix = []
 for line in dataFile:
 	line = line.strip()
 	line = line.split(',')
 	lineIndex = 0
+	lineArr = {}
 	#Load row values for X matrix
 	while(lineIndex < len(line)-1):
 		rawVal = line[lineIndex].strip() #Retreive mapping
+		if is_number(rawVal):
+			lineArr[str(lineIndex)] = float(rawVal)
+			#addItem = {str(lineIndex):float(rawVal)}
+		else:
+			lineArr[str(lineIndex)] = rawVal
 		if not rawVal in mapVals[lineIndex]:
 			xTestOG[loadIndex][lineIndex] = float(rawVal)
 		else:
 			mappedVal = mapVals[lineIndex][rawVal]
 			xTestOG[loadIndex][lineIndex] = mappedVal
 		lineIndex += 1
+	xTestMatrix.append(lineArr)
 	#Load associated value for Y Matrix
 	rawVal = line[lineIndex].strip()
 	mappedVal = mapVals[lineIndex][rawVal]
+	yTestMatrix.append(mappedVal)
 	yTest[loadIndex] = mappedVal
 	loadIndex +=1
 
+xTestMatrix = xVec.fit_transform(xTestMatrix).toarray()
 dataFile.close()
+xTestOG = xTestMatrix
+
+print str(len(xTrainMatrix))
+print str(len(yTrainMatrix))
+print str(len(xTestMatrix))
+print str(len(yTestMatrix))
 
 #Fake People Test
 fakeTest = False
@@ -147,46 +186,52 @@ for i in range(numColTest):
 
 	yTrain=yTrain.ravel()
 	yTest= yTest.ravel()
+
+	#Convert to NP array
+	xTrainMatrix = np.array(xTrainMatrix)
+	yTrainMatrix = np.array(yTrainMatrix)
+	xTestMatrix = np.array(xTestMatrix)
+	yTestMatrix = np.array(yTestMatrix)
 	#Gaussian
 
 	gnb= GaussianNB()
-	gnb.fit(xTrain, yTrain)
-	gnb_predictions= gnb.predict(xTest)
+	gnb.fit(xTrainMatrix, yTrainMatrix)
+	#gnb_predictions= gnb.predict(xTestMatrix)
 	if (printAll):
 		print "Gaussian Naive-Bayes:"
-		print "Train score: ",  gnb.score(xTrain, yTrain)
-		print "Test score: ", gnb.score(xTest, yTest)
+		print "Train score: ",  gnb.score(xTrainMatrix, yTrainMatrix)
+		print "Test score: ", gnb.score(xTestMatrix, yTestMatrix)
 	#print gnb.theta_, gnb.sigma_
 
 	#Multinomial
 	mnb=MultinomialNB()
-	mnb.fit(xTrain, yTrain)
-	mnb_predictions= mnb.predict(xTest)
-	mnbScore = mnb.score(xTest, yTest)
+	mnb.fit(xTrainMatrix, yTrainMatrix)
+	#mnb_predictions= mnb.predict(xTestMatrix)
+	mnbScore = mnb.score(xTestMatrix, yTestMatrix)
 	if (printAll):
 		print "Multinomial Naive-Bayes:"
-		print "Train score: ", mnb.score(xTrain, yTrain)
+		print "Train score: ", mnb.score(xTrainMatrix, yTrainMatrix)
 		print  "Test score: ", mnbScore
 
 	
 	#Bernoulli
 	bnb=MultinomialNB()
-	bnb.fit(xTrain, yTrain)
-	bnb.predictions= bnb.predict(xTest)
+	bnb.fit(xTrainMatrix, yTrainMatrix)
+	#bnb.predictions= bnb.predict(xTestMatrix)
 	if (printAll):
 		print "Bernoulli Naive-Bayes:"
-		print "Train score: ", bnb.score(xTrain, yTrain)
-		print "Test score: ", bnb.score(xTest, yTest)
+		print "Train score: ", bnb.score(xTrainMatrix, yTrainMatrix)
+		print "Test score: ", bnb.score(xTestMatrix, yTestMatrix)
 
 	
 	#Decision Tree Classifier
 	treeClass=  tree.DecisionTreeClassifier()
-	treeClass= treeClass.fit(xTrain, yTrain)
-	tc_predict=treeClass.predict(xTest)
-	treeScore= treeClass.score(xTest, yTest)
+	treeClass= treeClass.fit(xTrainMatrix, yTrainMatrix)
+	#tc_predict=treeClass.predict(xTestMatrix)
+	treeScore= treeClass.score(xTestMatrix, yTestMatrix)
 	if (printAll):
 		print "Decision Tree Classifier:"
-		print "Train score: ", treeClass.score(xTrain, yTrain)
+		print "Train score: ", treeClass.score(xTrainMatrix, yTrainMatrix)
 		print "Test score: ", treeScore
 
 	scoreArr.append(mnbScore)
