@@ -11,6 +11,8 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.naive_bayes import BernoulliNB
 from sklearn.feature_extraction import DictVectorizer
 from sklearn import tree
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 
 #Helper function for mapping
 def is_number(s):
@@ -125,7 +127,7 @@ for line in dataFile:
 	yTest[loadIndex] = mappedVal
 	loadIndex +=1
 
-xTestMatrix = xVec.fit_transform(xTestMatrix).toarray()
+xTestMatrix = xVec.transform(xTestMatrix).toarray()
 dataFile.close()
 xTestOG = xTestMatrix
 
@@ -192,8 +194,23 @@ for i in range(numColTest):
 	yTrainMatrix = np.array(yTrainMatrix)
 	xTestMatrix = np.array(xTestMatrix)
 	yTestMatrix = np.array(yTestMatrix)
-	#Gaussian
 
+
+	lda=LinearDiscriminantAnalysis()
+	lda.fit(xTrainMatrix, yTrainMatrix)
+	if (printAll):
+		print "LDA:"
+		print "Train score: ",  lda.score(xTrainMatrix, yTrainMatrix)
+		print "Test score: ", lda.score(xTestMatrix, yTestMatrix)
+
+	qda=QuadraticDiscriminantAnalysis()
+	qda.fit(xTrainMatrix, yTrainMatrix)
+	if (printAll):
+		print "QDA:"
+		print "Train score: ",  qda.score(xTrainMatrix, yTrainMatrix)
+		print "Test score: ", qda.score(xTestMatrix, yTestMatrix)
+
+	#Gaussian
 	gnb= GaussianNB()
 	gnb.fit(xTrainMatrix, yTrainMatrix)
 	#gnb_predictions= gnb.predict(xTestMatrix)
