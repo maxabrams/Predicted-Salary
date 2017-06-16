@@ -13,6 +13,8 @@ from sklearn.feature_extraction import DictVectorizer
 from sklearn import tree
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import mean_squared_error
 
 #Helper function for mapping
 def is_number(s):
@@ -196,19 +198,16 @@ for i in range(numColTest):
 	yTestMatrix = np.array(yTestMatrix)
 
 
-	lda=LinearDiscriminantAnalysis()
-	lda.fit(xTrainMatrix, yTrainMatrix)
+	logreg=LogisticRegression()
+	logreg.fit(xTrainMatrix, yTrainMatrix)
 	if (printAll):
-		print "LDA:"
-		print "Train score: ",  lda.score(xTrainMatrix, yTrainMatrix)
-		print "Test score: ", lda.score(xTestMatrix, yTestMatrix)
+		print "Logistic Regression:"
+		print "RMSE Train: ", mean_squared_error(yTrainMatrix, logreg.predict(xTrainMatrix))
+		print "RMSE Test: ", mean_squared_error(yTestMatrix, logreg.predict(xTestMatrix))
+		print "Train score: ",  logreg.score(xTrainMatrix, yTrainMatrix)
+		print "Test score: ", logreg.score(xTestMatrix, yTestMatrix)
 
-	qda=QuadraticDiscriminantAnalysis()
-	qda.fit(xTrainMatrix, yTrainMatrix)
-	if (printAll):
-		print "QDA:"
-		print "Train score: ",  qda.score(xTrainMatrix, yTrainMatrix)
-		print "Test score: ", qda.score(xTestMatrix, yTestMatrix)
+
 
 	#Gaussian
 	gnb= GaussianNB()
@@ -217,7 +216,10 @@ for i in range(numColTest):
 	if (printAll):
 		print "Gaussian Naive-Bayes:"
 		print "Train score: ",  gnb.score(xTrainMatrix, yTrainMatrix)
+		print "RMSE Train: ", mean_squared_error(yTrainMatrix, gnb.predict(xTrainMatrix))
 		print "Test score: ", gnb.score(xTestMatrix, yTestMatrix)
+		print "RMSE Test: ", mean_squared_error(yTestMatrix, gnb.predict(xTestMatrix))
+
 	#print gnb.theta_, gnb.sigma_
 
 	#Multinomial
@@ -228,7 +230,10 @@ for i in range(numColTest):
 	if (printAll):
 		print "Multinomial Naive-Bayes:"
 		print "Train score: ", mnb.score(xTrainMatrix, yTrainMatrix)
+		print "RMSE Train: ", mean_squared_error(yTrainMatrix, mnb.predict(xTrainMatrix))
+
 		print  "Test score: ", mnbScore
+		print "RMSE Test: ", mean_squared_error(yTestMatrix, mnb.predict(xTestMatrix))
 
 	
 	#Bernoulli
@@ -238,7 +243,10 @@ for i in range(numColTest):
 	if (printAll):
 		print "Bernoulli Naive-Bayes:"
 		print "Train score: ", bnb.score(xTrainMatrix, yTrainMatrix)
+		print "RMSE Train: ", mean_squared_error(yTrainMatrix, bnb.predict(xTrainMatrix))
+
 		print "Test score: ", bnb.score(xTestMatrix, yTestMatrix)
+		print "RMSE Test: ", mean_squared_error(yTestMatrix, bnb.predict(xTestMatrix))
 
 	
 	#Decision Tree Classifier
@@ -249,8 +257,12 @@ for i in range(numColTest):
 	if (printAll):
 		print "Decision Tree Classifier:"
 		print "Train score: ", treeClass.score(xTrainMatrix, yTrainMatrix)
-		print "Test score: ", treeScore
+		print "RMSE Train: ", mean_squared_error(yTrainMatrix, treeClass.predict(xTrainMatrix))
 
+		print "Test score: ", treeScore
+		print "RMSE Test: ", mean_squared_error(yTestMatrix, treeClass.predict(xTestMatrix))
+
+	
 	scoreArr.append(mnbScore)
 #Determine highest scores and associated attributes
 mapOut = {}
