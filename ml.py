@@ -32,16 +32,22 @@ numCol = 42
 #Build dictionary value mapings
 dataFile = open(fileLoc, 'r')
 mapVals = [dict() for x in range(numCol)]
-
+ages = [0] * 100
 for line in dataFile:
 	line = line.strip()
 	line = line.split(',')
 	for i in range(0, len(line)):
+		if(i==0):
+			ages[int(line[i])] += 1
 		currentDict = mapVals[i]
 		if(is_number(line[i].strip()) == False): #Only map strings, leave numbers alone
 			if not line[i].strip() in currentDict:
 				currentDict[line[i].strip()] = len(currentDict)
 
+printi = 0
+while(printi < 100):
+	print str(printi),',',str(ages[printi])
+	printi += 1
 dataFile.close()
 
 #Load training data into X and Y matrix
